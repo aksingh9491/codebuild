@@ -1,0 +1,13 @@
+{
+    "name": "samosa-project",
+    "source": {
+      "type": "S3",
+      "location": "globallogicinput/src"
+    },
+    "environment": {
+      "type": "LINUX_CONTAINER",
+      "image": "aws/codebuild/standard:4.0",
+      "computeType": "BUILD_GENERAL1_LARGE"
+    },
+    "serviceRole": "codebuildrole"
+  }

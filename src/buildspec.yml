@@ -1,0 +1,50 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+    commands:
+      - uname --a
+      - cat /etc/os-release
+      - pwd
+      - echo Entering install phase...
+      - wget -qO - https://releases.jfrog.io/artifactory/jfrog-gpg-public/jfrog_public_gpg.key |  apt-key add -
+      - echo "deb https://releases.jfrog.io/artifactory/jfrog-debs xenial contrib" |  tee -a /etc/apt/sources.list;
+      - apt update;
+      - apt install -y jfrog-cli-v2-jf;
+      
+  pre_build:
+    env:
+      ARTIFACTORY_API_KEY: 'AKCp8kqqmokih18TMm2CaAXwcJRsgLhcqPqAWDY6gwa55Aa8FYYUK2QseceAPKg9UjE5v1XPi'
+      ARTIFACTORY_URL: 'https://priar.jfrog.io/artifactory'
+      ARTIFACTORY_USER: 'kharatramesh@gmail.com'
+      ARTIFACTORY_MVN_REPO: 'https://priar.jfrog.io/artifactory/priar'
+    commands:
+      - echo Entering pre_build phase...
+      # - jf config --url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --apikey $ARTIFACTORY_API_KEY
+      # - sed -i -e 's|ARTIFACTORY_USER|${ARTIFACTORY_USER}|g' settings.xml && sed -i -e 's|ARTIFACTORY_PASSWORD|${ARTIFACTORY_API_KEY}|g' settings.xml && sed -i -e 's|ARTIFACTORY_MVN_REPO|${ARTIFACTORY_MVN_REPO}|g' settings.xml
+  build:
+    commands:
+      - echo Build started on `date`
+      - mvn install
+      # - mvn -s settings.xml -f pom.xml compile
+      # - mvn -s settings.xml -f pom.xml package
+      - ls 
+      - pwd
+      - touch 1.jar
+  post_build:
+    commands:
+      - touch 2.jar
+      - echo Build completed on `date`
+      - jf --version
+      # - jf c use priar
+      # - jf rt ping
+      - curl -H "X-JFrog-Art-Api:AKCp8kqqmokih18TMm2CaAXwcJRsgLhcqPqAWDY6gwa55Aa8FYYUK2QseceAPKg9UjE5v1XPi" -T target/*.jar "https://priar.jfrog.io/artifactory/priar/"
+      # - jf rt upload --flat=false *.* https://priar.jfrog.io/artifactory/priar
+      # - ./jfrog rt upload --flat=false *.* $ARTIFACTORY_MVN_REPO
+      - aws s3 sync . s3://globallogicoutput/
+      
+artifacts:
+    files:
+    - target/*.jar
